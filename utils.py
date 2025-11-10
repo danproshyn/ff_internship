@@ -121,6 +121,7 @@ def read_communications(path):
     )
 
     communications = communications.rename(columns=str.lower)
+    communications = communications.dropna()
 
     return communications
 
