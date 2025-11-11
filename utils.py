@@ -1,9 +1,22 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
 def get_series_first_mode_or_nan(s):
     return s.mode().iloc[0] if not s.mode().empty else np.nan
+
+
+def read_clients(path):
+    clients = pd.read_csv(path)
+
+    # Rename columns to be lowercase
+    clients = clients.rename(columns=str.lower)
+
+    # Convert bool columns to 0 and 1
+    clients = clients.astype({col: 'int8' for col in ('target', 'is_train')})
+
+    return clients
 
 
 def read_transactions(path):
@@ -85,7 +98,7 @@ def read_app_activity(path):
     return app_activity
 
 
-def handle_activity_null_values(df):
+def preprocess_app_activity_data(df):
     # Drop columns with NULL-values > 40%
     df = df.drop(columns=['float_c13', 'float_c15', 'float_c16', 'float_c17'])
 
@@ -121,9 +134,12 @@ def read_communications(path):
     )
 
     communications = communications.rename(columns=str.lower)
-    communications = communications.dropna()
 
     return communications
+
+
+def preprocess_comm_data(df):
+    return df.dropna()
 
 
 def encode_comm_categories(df):
@@ -131,3 +147,49 @@ def encode_comm_categories(df):
         mapping = {val: idx for idx, val in enumerate(np.sort(df[col].unique()))}
         df[col] = df[col].map(mapping).astype('int32')
     return df
+
+
+def plot_categorical_cols_distribution(df, cols, ncols=3):
+    nrows = len(cols) // ncols + 1
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(8 * ncols, 5 * nrows))
+    axes = axes.flatten()
+
+    for i, col in enumerate(cols):
+        ax = axes[i]
+        counts = df[col].value_counts().head(20).sort_index()
+        counts.plot(kind='bar', ax=ax)
+        ax.set_title(col)
+        ax.set_xlabel('Category')
+        ax.set_ylabel('Count')
+        if sum(map(lambda x: len(str(x)), counts.index.values)) > 50:
+            ax.tick_params(axis='x', rotation=45)
+        else:
+            ax.tick_params(axis='x', rotation=0)
+
+    for j in range(len(cols), len(axes)):
+        fig.delaxes(axes[j])
+
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_continuous_cols_distribution(df, cols, ncols=3, left_quantile=0.05, right_quantile=0.95):
+    nrows = len(cols) // ncols + 1
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(8 * ncols, 5 * nrows))
+    axes = axes.flatten()
+
+    for i, col in enumerate(cols):
+        ax = axes[i]
+        data = df[col]
+        data_filtered = data[data.between(data.quantile(left_quantile), data.quantile(right_quantile))]
+        data_filtered.hist(ax=ax, bins=200)
+        ax.set_title(col)
+        ax.tick_params(axis='x', rotation=0)
+
+    for j in range(len(cols), len(axes)):
+        fig.delaxes(axes[j])
+
+    plt.tight_layout()
+    plt.show()
