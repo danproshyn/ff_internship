@@ -174,22 +174,41 @@ def plot_categorical_cols_distribution(df, cols, ncols=3):
     plt.show()
 
 
-def plot_continuous_cols_distribution(df, cols, ncols=3, left_quantile=0.05, right_quantile=0.95):
-    nrows = len(cols) // ncols + 1
+def plot_continuous_cols_distribution(series_list, ncols=3, left_quantile=0.05, right_quantile=0.95):
+    nrows = len(series_list) // ncols + 1
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(8 * ncols, 5 * nrows))
     axes = axes.flatten()
 
-    for i, col in enumerate(cols):
+    for i, series in enumerate(series_list):
         ax = axes[i]
-        data = df[col]
+        data = series_list[i]
         data_filtered = data[data.between(data.quantile(left_quantile), data.quantile(right_quantile))]
         data_filtered.hist(ax=ax, bins=200)
-        ax.set_title(col)
+        ax.set_title(series.name)
         ax.tick_params(axis='x', rotation=0)
 
-    for j in range(len(cols), len(axes)):
+    for j in range(len(series_list), len(axes)):
         fig.delaxes(axes[j])
 
     plt.tight_layout()
     plt.show()
+
+
+def convert_np_int_dtypes_to_nullable(df):
+    int_dtypes = ['int64', 'int32', 'int16', 'int8']
+    df = df.astype({col: 'I' + dtype.name[1:] for col, dtype in zip(df.columns, df.dtypes) if dtype.name in int_dtypes})
+    return df
+
+
+def fill_feature_nan_values(df, cols, vals_to_fill, new_missing_col=None):
+    rows_with_nulls = df[df[cols].isna().any(axis=1)]
+    df.loc[rows_with_nulls.index, cols] = vals_to_fill
+
+    if new_missing_col:
+        # Add new column to indicate which rows had nan values
+        df[new_missing_col] = 0
+        df[new_missing_col] = df[new_missing_col].astype('int8')
+        df.loc[rows_with_nulls.index, new_missing_col] = 1
+
+    return df
