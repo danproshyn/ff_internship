@@ -1,6 +1,12 @@
+featuretools
+feature-engine
+ipython
 numpy
 pandas
 seaborn
 matplotlib
 scikit-learn
 xgboost
+woodwork
+# dask
+# distributed

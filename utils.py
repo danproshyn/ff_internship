@@ -7,19 +7,29 @@ def get_series_first_mode_or_nan(s):
     return s.mode().iloc[0] if not s.mode().empty else np.nan
 
 
-def read_clients(path):
-    clients = pd.read_csv(path)
+def read_clients(path, encode_bool=True):
+    clients_dtypes = {
+        'CLIENT_ID': 'uint64',
+        'TARGET': 'bool',
+        'IS_TRAIN': 'bool',
+    }
+    clients = pd.read_csv(
+        path,
+        dtype=clients_dtypes,
+        parse_dates=['COMMUNICATION_MONTH'],
+    )
 
     # Rename columns to be lowercase
     clients = clients.rename(columns=str.lower)
 
     # Convert bool columns to 0 and 1
-    clients = clients.astype({col: 'int8' for col in ('target', 'is_train')})
+    if encode_bool:
+        clients = clients.astype({col: 'int8' for col in ('target', 'is_train')})
 
     return clients
 
 
-def read_transactions(path):
+def read_transactions(path, encode_bool=True):
     transactions_dtypes = {
        'CLIENT_ID': 'uint64',
        'CAT_C2': 'category',
@@ -54,7 +64,8 @@ def read_transactions(path):
     transactions = transactions.rename(columns=str.lower)
 
     # Convert bool columns to 0 and 1
-    transactions = transactions.astype({col: 'int8' for col in transactions.columns if col.startswith('fl_')})
+    if encode_bool:
+        transactions = transactions.astype({col: 'int8' for col in transactions.columns if col.startswith('fl_')})
 
     # Convert categorical columns to int
     transactions = transactions.astype({col: 'int32' for col in transactions.columns if col.startswith('cat_')})
@@ -62,7 +73,7 @@ def read_transactions(path):
     return transactions
 
 
-def read_app_activity(path):
+def read_app_activity(path, encode_bool=True):
     app_activity_dtypes = {
        'CLIENT_ID': 'uint64',
        'DEVICE_ID': 'uint64',
@@ -93,7 +104,8 @@ def read_app_activity(path):
     app_activity = app_activity.rename(columns=str.lower)
 
     # Convert bool columns to 0 and 1
-    app_activity = app_activity.astype({col: 'Int8' for col in ('cat_c8', 'cat_c10')})
+    if encode_bool:
+        app_activity = app_activity.astype({col: 'Int8' for col in ('cat_c8', 'cat_c10')})
 
     return app_activity
 

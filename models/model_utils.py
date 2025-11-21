@@ -9,9 +9,28 @@ def split_dataset(clients_path, features_path, valid_size=0.2):
     clients = pd.read_csv(clients_path)
     features = pd.read_csv(features_path)
 
-    dataset = pd.merge(clients, features, on='client_id').drop(columns=['client_id'])
+    dataset = pd.merge(clients, features, on='client_id')
+    dataset = dataset.drop(columns=['client_id', 'communication_month'])
+
     train_dataset = dataset[dataset['is_train']].drop(columns=['is_train'])
     test_dataset = dataset[~dataset['is_train']].drop(columns=['is_train'])
+
+    X = train_dataset.drop(columns=['target'])
+    X_test = test_dataset.drop(columns=['target'])
+    y = train_dataset['target']
+    y_test = test_dataset['target']
+
+    X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=valid_size, stratify=y, random_state=42)
+
+    return X_train, X_valid, X_test, y_train, y_valid, y_test
+
+
+def split_dataset_v2(path, valid_size=0.2):
+    dataset = pd.read_csv(path)
+    dataset.drop(columns=['client_id'], inplace=True)
+
+    train_dataset = dataset[dataset['is_train'] == 1].drop(columns=['is_train'])
+    test_dataset = dataset[dataset['is_train'] == 0].drop(columns=['is_train'])
 
     X = train_dataset.drop(columns=['target'])
     X_test = test_dataset.drop(columns=['target'])

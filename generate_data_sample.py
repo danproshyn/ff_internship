@@ -21,3 +21,17 @@ for client_id, groups in df.groupby('CLIENT_ID'):
     if client_id in client_ids:
         res = pd.concat([res, groups], ignore_index=True)
 res.to_csv(OUT_FILENAME, index=False)
+
+
+
+# # For CLIENTS only
+# IN_FILENAME = 'data/initial/CLIENTS.csv'
+# OUT_FILENAME = 'data/samples/CLIENTS_SAMPLE.csv'
+#
+# client_ids = pd.read_csv('data/samples/CLIENTS_SAMPLE_PREV.csv')['client_id'].values
+# df = pd.read_csv(IN_FILENAME)
+# res = pd.DataFrame(columns=df.columns)
+# for _, series in df.iterrows():
+#     if series['CLIENT_ID'] in client_ids:
+#         res.loc[len(res)] = series
+# res.to_csv(OUT_FILENAME, index=False)
