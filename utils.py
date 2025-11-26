@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from feature_engine.creation import CyclicalFeatures
 
 
 def get_series_first_mode_or_nan(s):
@@ -16,7 +17,7 @@ def read_clients(path, encode_bool=True):
     clients = pd.read_csv(
         path,
         dtype=clients_dtypes,
-        parse_dates=['COMMUNICATION_MONTH'],
+        parse_dates=['communication_month'],
     )
 
     # Rename columns to be lowercase
@@ -224,3 +225,32 @@ def fill_feature_nan_values(df, cols, vals_to_fill, new_missing_col=None):
         df.loc[rows_with_nulls.index, new_missing_col] = 1
 
     return df
+
+
+def add_calendar_values(df, date_col, prefix=None):
+    df['day_of_week'] = df[date_col].dt.dayofweek
+    df['day_of_month'] = df[date_col].dt.day
+    df['is_weekend'] = df['day_of_week'].apply(lambda x: x >= 5)
+
+    # Encode cyclical values
+    time_cols = ['day_of_week', 'day_of_month']
+    df = df.astype({col: 'int8' for col in time_cols})
+    cyclical = CyclicalFeatures(variables=time_cols, drop_original=True)
+    df = cyclical.fit_transform(df)
+
+    # Add prefix
+    if prefix:
+        for col in ('day_of_week_sin', 'day_of_week_cos', 'day_of_month_sin', 'day_of_month_cos', 'is_weekend'):
+            df = df.rename(columns={col: prefix + col})
+
+    return df
+# df_trans = add_calendar_features(transactions_df, 'tran_date')
+# calendar_features = df_trans.groupby('client_id').agg({
+#     'is_weekend': ['mean'],
+#     'day_of_week_sin': ['mean'],
+#     'day_of_week_cos': ['mean'],
+#     'day_of_month_sin': ['mean'],
+#     'day_of_month_cos': ['mean'],
+# })
+# calendar_features.columns = ['_'.join(col).strip() for col in calendar_features.columns.values]
+# print(calendar_features.head())
