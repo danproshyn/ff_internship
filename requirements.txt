@@ -1,4 +1,4 @@
-featuretools
+featuretools[dask]
 feature-engine
 ipython
 numpy
@@ -9,5 +9,3 @@ scikit-learn
 tsfresh
 xgboost
 woodwork
-# dask
-# distributed
