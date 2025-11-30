@@ -30,7 +30,7 @@ def read_clients(path, encode_bool=True):
     return clients
 
 
-def read_transactions(path, encode_bool=True):
+def read_transactions(path, encode_bool=True, encode_category=True):
     transactions_dtypes = {
        'CLIENT_ID': 'uint64',
        'CAT_C2': 'category',
@@ -69,21 +69,22 @@ def read_transactions(path, encode_bool=True):
         transactions = transactions.astype({col: 'int8' for col in transactions.columns if col.startswith('fl_')})
 
     # Convert categorical columns to int
-    transactions = transactions.astype({col: 'int32' for col in transactions.columns if col.startswith('cat_')})
+    if encode_category:
+        transactions = transactions.astype({col: 'int32' for col in transactions.columns if col.startswith('cat_')})
 
     return transactions
 
 
-def read_app_activity(path, encode_bool=True):
+def read_app_activity(path, encode_bool=True, encode_category=True):
     app_activity_dtypes = {
        'CLIENT_ID': 'uint64',
        'DEVICE_ID': 'uint64',
-       'CAT_C3': 'Int32',
-       'CAT_C4': 'Int32',
-       'CAT_C5': 'Int32',
-       'CAT_C6': 'Int32',
+       'CAT_C3': 'category',
+       'CAT_C4': 'category',
+       'CAT_C5': 'category',
+       'CAT_C6': 'category',
        'CAT_C8': 'boolean',
-       'CAT_C9': 'Int32',
+       'CAT_C9': 'category',
        'CAT_C10': 'boolean',
        'FLOAT_C11': 'float32',
        'FLOAT_C12': 'float32',
@@ -108,6 +109,10 @@ def read_app_activity(path, encode_bool=True):
     if encode_bool:
         app_activity = app_activity.astype({col: 'Int8' for col in ('cat_c8', 'cat_c10')})
 
+    # Convert categorical columns to int
+    if encode_category:
+        app_activity = app_activity.astype({col: 'int32' for col in app_activity.select_dtypes(include=['category']).columns})
+
     return app_activity
 
 
@@ -129,12 +134,12 @@ def preprocess_app_activity_data(df):
     return df
 
 
-def read_communications(path):
+def read_communications(path, encode_category=True):
     communications_dtypes = {
        'CLIENT_ID': 'uint64',
        'CAT_C2': 'category',
-       'CAT_C3': 'int32',
-       'CAT_C4': 'int32',
+       'CAT_C3': 'category',
+       'CAT_C4': 'category',
        'CAT_C5': 'category',
 
     }
@@ -147,6 +152,10 @@ def read_communications(path):
     )
 
     communications = communications.rename(columns=str.lower)
+
+    # Convert categorical columns to int
+    if encode_category:
+        communications = communications.astype({col: 'int32' for col in ('cat_c3', 'cat_c4')})
 
     return communications
 
@@ -241,6 +250,8 @@ def add_calendar_values(df, date_col, prefix=None):
     # Add prefix
     if prefix:
         for col in ('day_of_week_sin', 'day_of_week_cos', 'day_of_month_sin', 'day_of_month_cos', 'is_weekend'):
+            if df[col].dtype == 'float64':
+                df[col] = df[col].astype('float32')
             df = df.rename(columns={col: prefix + col})
 
     return df
