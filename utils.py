@@ -1,3 +1,5 @@
+import json
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -265,3 +267,17 @@ def add_calendar_values(df, date_col, prefix=None):
 # })
 # calendar_features.columns = ['_'.join(col).strip() for col in calendar_features.columns.values]
 # print(calendar_features.head())
+
+
+def write_df_dtype(df, path):
+    with open(path, 'w') as f:
+        json.dump(df.dtypes.astype(str).to_dict(), f)
+
+
+def read_df_dtype(path):
+    with open(path, 'r') as f:
+        dtype = json.load(f)
+    date_cols = [col for col, dtype in dtype.items() if dtype == 'datetime64[ns]']
+    dtype = {col: dtype for col, dtype in dtype.items() if col not in date_cols}
+
+    return dtype, date_cols

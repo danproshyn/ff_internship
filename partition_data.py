@@ -4,7 +4,7 @@ import pandas as pd
 from utils import read_clients, read_transactions, read_communications, read_app_activity
 
 
-CHUNKS = 18
+CHUNKS = 6
 
 OUTPUT_DIR = 'data/chunks/'
 CLIENTS_PATH = 'data/initial/CLIENTS.csv'
