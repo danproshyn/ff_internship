@@ -1,5 +1,4 @@
-import os.path
-import pandas as pd
+import os
 
 from utils import read_clients, read_transactions, read_communications, read_app_activity
 
