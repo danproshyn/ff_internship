@@ -1,6 +1,7 @@
 featuretools[dask]
 feature-engine
 ipython
+lightgbm
 numpy
 pandas
 seaborn
