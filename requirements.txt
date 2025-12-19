@@ -7,6 +7,8 @@ pandas
 seaborn
 matplotlib
 scikit-learn
+sklearn-genetic-opt
 tsfresh
 xgboost
 woodwork
+boruta
