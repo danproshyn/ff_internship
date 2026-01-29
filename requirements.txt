@@ -12,3 +12,7 @@ tsfresh
 xgboost
 woodwork
 boruta
+optuna
+plotly
+catboost
+shap

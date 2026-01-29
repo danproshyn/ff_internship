@@ -3,19 +3,15 @@ import os
 from utils import read_clients, read_transactions, read_communications, read_app_activity
 
 
-CHUNKS = 6
+CHUNKS_NUM = 54
 
-OUTPUT_DIR = 'data/chunks/'
-CLIENTS_PATH = 'data/initial/CLIENTS.csv'
-TRANSACTIONS_PATH = 'data/initial/TRANSACTIONS.csv'
-ACTIVITIES_PATH = 'data/initial/APP_ACTIVITY.csv'
-COMMUNICATIONS_PATH = 'data/initial/COMMUNICATIONS.csv'
+INPUT_DIR = 'data/raw/'
+OUTPUT_DIR = 'data/raw_chunks/'
 
-# OUTPUT_DIR = 'data/chunks_sm/'
-# CLIENTS_PATH = 'data/samples/CLIENTS_SAMPLE.csv'
-# TRANSACTIONS_PATH = 'data/samples/TRANSACTIONS_SAMPLE.csv'
-# ACTIVITIES_PATH = 'data/samples/APP_ACTIVITY_SAMPLE.csv'
-# COMMUNICATIONS_PATH = 'data/samples/COMMUNICATIONS_SAMPLE.csv'
+CLIENTS_PATH = os.path.join(INPUT_DIR, 'CLIENTS.csv')
+TRANSACTIONS_PATH = os.path.join(INPUT_DIR, 'TRANSACTIONS.csv')
+ACTIVITIES_PATH = os.path.join(INPUT_DIR, 'APP_ACTIVITY.csv')
+COMMUNICATIONS_PATH = os.path.join(INPUT_DIR, 'COMMUNICATIONS.csv')
 
 
 df_clients = read_clients(CLIENTS_PATH, encode_bool=False)
@@ -24,11 +20,12 @@ df_activities = read_app_activity(ACTIVITIES_PATH, encode_bool=False, encode_cat
 df_communications = read_communications(COMMUNICATIONS_PATH, encode_category=False)
 
 
-clients_chunk_size = int(df_clients.shape[0] / CHUNKS) + 1
+clients_chunk_size = int(df_clients.shape[0] / CHUNKS_NUM) + 1
 clients_chunks = [
     df_clients.iloc[i:i+clients_chunk_size, :]
     for i in range(0, df_clients.shape[0], clients_chunk_size)
 ]
+
 for count, cl_chunk in enumerate(clients_chunks, start=1):
     print(f'Processing chunk {count} of {len(clients_chunks)}...')
 
@@ -38,8 +35,8 @@ for count, cl_chunk in enumerate(clients_chunks, start=1):
 
     chunk_dir = os.path.join(OUTPUT_DIR, str(count))
     os.makedirs(chunk_dir, exist_ok=True)
+
     cl_chunk.to_csv(os.path.join(chunk_dir, 'CLIENTS.csv'), index=False)
     tx_chunk.to_csv(os.path.join(chunk_dir, 'TRANSACTIONS.csv'), index=False)
     act_chunk.to_csv(os.path.join(chunk_dir, 'APP_ACTIVITY.csv'), index=False)
     comm_chunk.to_csv(os.path.join(chunk_dir, 'COMMUNICATIONS.csv'), index=False)
-

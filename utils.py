@@ -19,7 +19,7 @@ def read_clients(path, encode_bool=True):
     clients = pd.read_csv(
         path,
         dtype=clients_dtypes,
-        parse_dates=['communication_month'],
+        parse_dates=['COMMUNICATION_MONTH'],
     )
 
     # Rename columns to be lowercase
@@ -257,16 +257,6 @@ def add_calendar_values(df, date_col, prefix=None):
             df = df.rename(columns={col: prefix + col})
 
     return df
-# df_trans = add_calendar_features(transactions_df, 'tran_date')
-# calendar_features = df_trans.groupby('client_id').agg({
-#     'is_weekend': ['mean'],
-#     'day_of_week_sin': ['mean'],
-#     'day_of_week_cos': ['mean'],
-#     'day_of_month_sin': ['mean'],
-#     'day_of_month_cos': ['mean'],
-# })
-# calendar_features.columns = ['_'.join(col).strip() for col in calendar_features.columns.values]
-# print(calendar_features.head())
 
 
 def write_df_dtype(df, path):
